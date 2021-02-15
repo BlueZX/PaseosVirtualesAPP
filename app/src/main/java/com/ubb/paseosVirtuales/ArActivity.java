@@ -30,7 +30,7 @@ import com.google.ar.sceneform.rendering.ViewRenderable;
 import com.google.ar.sceneform.ux.ArFragment;
 import com.google.ar.sceneform.ux.TransformableNode;
 import com.google.gson.Gson;
-import com.ubb.paseosVirtuales.helper.InfoCardHelper;
+import com.ubb.paseosVirtuales.helper.DataModelHelper;
 import com.ubb.paseosVirtuales.helper.LocationPermissionHelper;
 import com.ubb.paseosVirtuales.helper.getDataHelper;
 import com.ubb.paseosVirtuales.model.DataModel;
@@ -172,7 +172,7 @@ public class ArActivity extends AppCompatActivity implements LocationListener {
                     TransformableNode node = new TransformableNode(arFragment.getTransformationSystem());
                     node.setParent(anchorNode);
 
-                    InfoCardHelper dmModel = new InfoCardHelper(dm,renderable,this, arFragment, node);
+                    DataModelHelper dmModel = new DataModelHelper(dm,renderable,this, arFragment, node);
                     dmModel.setParent(node);
 
                     // Create the transformable node and add it to the anchor.

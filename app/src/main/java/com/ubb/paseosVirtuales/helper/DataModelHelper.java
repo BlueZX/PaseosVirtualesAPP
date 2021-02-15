@@ -19,7 +19,7 @@ import com.google.ar.sceneform.ux.TransformableNode;
 import com.ubb.paseosVirtuales.R;
 import com.ubb.paseosVirtuales.model.DataModel;
 
-public class InfoCardHelper  extends Node implements Node.OnTapListener {
+public class DataModelHelper extends Node implements Node.OnTapListener {
     private final DataModel dataModel;
     private final ModelRenderable dmRenderable;
     private final Context context;
@@ -29,7 +29,7 @@ public class InfoCardHelper  extends Node implements Node.OnTapListener {
     private Node dmVisual;
     private Node infoCard;
 
-    public InfoCardHelper(DataModel dataModel, ModelRenderable dmRenderable, Context context, ArFragment arFragment, TransformableNode parent){
+    public DataModelHelper(DataModel dataModel, ModelRenderable dmRenderable, Context context, ArFragment arFragment, TransformableNode parent){
         this.dataModel = dataModel;
         this.dmRenderable = dmRenderable;
         this.context = context;
