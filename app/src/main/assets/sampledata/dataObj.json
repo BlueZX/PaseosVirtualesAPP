@@ -1,0 +1,17 @@
+{
+    "location": {
+        "lat": -37.271705,
+        "lon":-72.711790,
+        "z":12
+    },
+    "model": {
+        "obj": "aqui el objeto",
+        "texture": "aqui textura",
+        "shadow": "shadow"
+    },
+    "data": {
+        "name": "Andy",
+        "description": "Lorem ipsum",
+        "dateMonument": "fecha"
+    }
+}
