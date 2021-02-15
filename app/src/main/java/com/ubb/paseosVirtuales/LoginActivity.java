@@ -9,6 +9,15 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 
+import com.android.volley.Response;
+import com.android.volley.Response.Listener;
+import com.android.volley.VolleyError;
+import com.ubb.paseosVirtuales.helper.GlobalHelper;
+import com.ubb.paseosVirtuales.helper.VolleyHelper;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class LoginActivity extends AppCompatActivity {
 
     private ImageButton closeButton;
@@ -16,6 +25,9 @@ public class LoginActivity extends AppCompatActivity {
     private Button signUpButton;
     private TextInputEditText emailET;
     private TextInputEditText passwordET;
+
+    private VolleyHelper volleyHelper;
+    private  JSONObject postData = new JSONObject();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,14 +43,35 @@ public class LoginActivity extends AppCompatActivity {
         emailET.setText("ej@gmail.com");
         passwordET.setText("hola1234");
 
+        try {
+            postData.put("name", emailET.getText().toString());
+            postData.put("job", passwordET.getText().toString());
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        volleyHelper = new VolleyHelper(this, GlobalHelper.ENDPOINT);
+
         signInButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(emailET.getText().toString().equals("ej@gmail.com") && passwordET.getText().toString().equals("hola1234")){
-                    Log.d("login", emailET.getText() + ", " + passwordET.getText());
-                    Intent intent = new Intent(view.getContext(), MainMenuActivity.class);
-                    startActivity(intent);
-                }
+
+                volleyHelper.post("api/users", postData, new Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.i("Login", response.toString());
+
+                        Intent intent = new Intent(view.getContext(), MainMenuActivity.class);
+                        startActivity(intent);
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        error.printStackTrace();
+                    }
+                });
+
             }
         });
 
