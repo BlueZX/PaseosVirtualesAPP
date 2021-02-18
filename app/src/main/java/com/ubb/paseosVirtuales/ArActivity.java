@@ -2,14 +2,17 @@ package com.ubb.paseosVirtuales;
 
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.DownloadManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -17,6 +20,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.ar.core.Anchor;
@@ -25,29 +29,42 @@ import com.google.ar.core.Plane;
 import com.google.ar.core.TrackingState;
 import com.google.ar.sceneform.AnchorNode;
 import com.google.ar.sceneform.FrameTime;
+import com.google.ar.sceneform.assets.RenderableSource;
 import com.google.ar.sceneform.rendering.ModelRenderable;
-import com.google.ar.sceneform.rendering.ViewRenderable;
 import com.google.ar.sceneform.ux.ArFragment;
 import com.google.ar.sceneform.ux.TransformableNode;
 import com.google.gson.Gson;
+import com.ubb.paseosVirtuales.DataBase.Modelo;
 import com.ubb.paseosVirtuales.helper.DataModelHelper;
+import com.ubb.paseosVirtuales.helper.GlobalHelper;
 import com.ubb.paseosVirtuales.helper.LocationPermissionHelper;
 import com.ubb.paseosVirtuales.helper.getDataHelper;
 import com.ubb.paseosVirtuales.model.DataModel;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.Callable;
+import java.util.concurrent.FutureTask;
 
 public class ArActivity extends AppCompatActivity implements LocationListener {
     private static final String TAG = ArActivity.class.getSimpleName();
     private static final double MIN_OPENGL_VERSION = 3.0;
 
     private ArFragment arFragment;
-    private List<DataModel> modelsList;
+    private List<DataModel> modelsList = new ArrayList<>();
+    private JSONArray jsonArray;
     private Location location;
-
+    private File file;
+    private Callable<InputStream> callable;
+    private FutureTask task;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,19 +74,24 @@ public class ArActivity extends AppCompatActivity implements LocationListener {
             return;
         }
 
-        //TODO: llenar lista de modelos
-        modelsList = new ArrayList<>();
+        try {
+            Modelo obj = new Modelo();
+            String json = obj.getParametro(this,"MODELS");
+            jsonArray = new JSONArray(json);
 
-        String jsonFileString = getDataHelper.getJsonFromAssets(getApplicationContext(), "sampledata/dataObj.json");
-        assert jsonFileString != null;
-        Log.i("dataJSON", jsonFileString);
+            Gson gson = new Gson();
 
-        Gson gson = new Gson();
-        DataModel dataTest = gson.fromJson(jsonFileString, DataModel.class);
-        dataTest.location.setLocation(dataTest.location.lat, dataTest.location.lon);
-        Log.i("dataJSON", "latitud: "+ dataTest.location.lat + ", longitud: " + dataTest.location.lon);
-        modelsList.add(dataTest);
+            for (int i = 0; i < jsonArray.length(); i++) {
+                DataModel m = gson.fromJson(jsonArray.getJSONObject(i).toString(),DataModel.class);
+                m.location.setLocation(m.location.lat, m.location.lng);
 
+                modelsList.add(m);
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+            //TODO: mensaje de error
+        }
 
         setContentView(R.layout.activity_ar);
 
@@ -119,87 +141,59 @@ public class ArActivity extends AppCompatActivity implements LocationListener {
         }
     }
 
-    private void renderInfo(DataModel dm, Anchor anchor) {
-
-        ViewRenderable.builder()
-                .setView(arFragment.getContext(), R.layout.controls)
-                .build()
-                .thenAccept( renderable -> {
-                    renderable.setShadowCaster(false);
-                    renderable.setShadowReceiver(false);
-                    ImageButton imageButton = (ImageButton) renderable.getView().findViewById(R.id.info_button);
-                    imageButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            Log.d("boton ar","se toco el boton info");
-                        }
-                    });
-
-                    dm.model.setViewRenderable(renderable);
-                    //addControlsToScene(anchor, renderable);
-                })
-                .exceptionally(
-                        throwable -> {
-                            Toast toast =
-                                    Toast.makeText(this, "No se puede leer/renderizar el elemento de UI", Toast.LENGTH_LONG);
-                            toast.setGravity(Gravity.CENTER, 0, 0);
-                            toast.show();
-                            return null;
-                });
-    }
-
-    private void addControlsToScene(Anchor anchor, ViewRenderable renderable) {
-        AnchorNode anchorNode = new AnchorNode(anchor);
-
-        TransformableNode node = new TransformableNode(arFragment.getTransformationSystem());
-        node.setRenderable(renderable);
-        node.setParent(anchorNode);
-        arFragment.getArSceneView().getScene().addChild(anchorNode);
-    }
-
     private void renderObj(DataModel dm, Anchor anchor, FrameTime frameTime) {
+        RenderableSource renderableSource = RenderableSource
+                .builder()
+                .setSource(this, Uri.parse(GlobalHelper.DOWNLOAD + "/uploads/modelo/"+ dm.model.obj), RenderableSource.SourceType.GLTF2)
+                .build();
 
-        dm.location.setPosicionado(true);
+        if( !dm.location.posicionado){
+            dm.location.setPosicionado(true);
+            ModelRenderable.builder()
+                    .setSource(
+                            this,
+                            renderableSource)
+                    .build()
+                    .thenAccept(modelRenderable -> {
 
-        ModelRenderable.builder()
-                .setSource(this, R.raw.andy)
-                .build()
-                .thenAccept(renderable -> {
+                        AnchorNode anchorNode = new AnchorNode(anchor);
+                        anchorNode.setParent(arFragment.getArSceneView().getScene());
 
-                    AnchorNode anchorNode = new AnchorNode(anchor);
-                    anchorNode.setParent(arFragment.getArSceneView().getScene());
+                        TransformableNode node = new TransformableNode(arFragment.getTransformationSystem());
+                        node.setParent(anchorNode);
 
-                    TransformableNode node = new TransformableNode(arFragment.getTransformationSystem());
-                    node.setParent(anchorNode);
+                        //node.setRenderable(modelRenderable);
+                        //node.select();
 
-                    DataModelHelper dmModel = new DataModelHelper(dm,renderable,this, arFragment, node);
-                    dmModel.setParent(node);
+                        DataModelHelper dmModel = new DataModelHelper(dm,modelRenderable,this, arFragment, node);
+                        dmModel.setParent(node);
+                        // Create the transformable node and add it to the anchor.
+                        //TransformableNode node = new TransformableNode(arFragment.getTransformationSystem());
+                        //node.setParent(anchorNode);
+                        //node.setRenderable(renderable);
+                        //node.select();
 
-                    // Create the transformable node and add it to the anchor.
-                    //TransformableNode node = new TransformableNode(arFragment.getTransformationSystem());
-                    //node.setParent(anchorNode);
-                    //node.setRenderable(renderable);
-                    //node.select();
+                        //Vector3 cameraPosition = arFragment.getArSceneView().getScene().getCamera().getWorldPosition();
 
-                    //Vector3 cameraPosition = arFragment.getArSceneView().getScene().getCamera().getWorldPosition();
+                        //InfoCardHelper info = new InfoCardHelper(dm.model.getViewRenderable( node.getCollisionShape(), cameraPosition ), dataModel, dmRenderable, infoCard, context, arFragment);
 
-                    //InfoCardHelper info = new InfoCardHelper(dm.model.getViewRenderable( node.getCollisionShape(), cameraPosition ), dataModel, dmRenderable, infoCard, context, arFragment);
-
-                    //node.addChild(info);
+                        //node.addChild(info);
 
 
-                    //anchorNode.setRenderable(renderable);
-                    //arFragment.getArSceneView().getScene().addChild(anchorNode);
+                        //anchorNode.setRenderable(renderable);
+                        //arFragment.getArSceneView().getScene().addChild(anchorNode);
 
-                })
-                .exceptionally(
-                        throwable -> {
-                            Toast toast =
-                                    Toast.makeText(this, "Unable to load andy renderable", Toast.LENGTH_LONG);
-                            toast.setGravity(Gravity.CENTER, 0, 0);
-                            toast.show();
-                            return null;
-                        });
+                    })
+                    .exceptionally(
+                            throwable -> {
+                                Toast toast =
+                                        Toast.makeText(this, "Unable to load andy renderable", Toast.LENGTH_LONG);
+                                toast.setGravity(Gravity.CENTER, 0, 0);
+                                toast.show();
+                                return null;
+                            });
+
+        }
 
     }
 
@@ -217,7 +211,7 @@ public class ArActivity extends AppCompatActivity implements LocationListener {
         }
 
         //Se reanuda la session del arFragment
-        arFragment.onResume();
+        //arFragment.onResume();
 
     }
 
@@ -226,7 +220,7 @@ public class ArActivity extends AppCompatActivity implements LocationListener {
         super.onPause();
 
         //Se pausa la session de arFragment
-        arFragment.onPause();
+        //arFragment.onPause();
     }
 
     private void handleLocationServices() {

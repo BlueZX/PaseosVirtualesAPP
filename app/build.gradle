@@ -43,6 +43,7 @@ dependencies {
 
     //ArCore
     implementation "com.google.ar.sceneform.ux:sceneform-ux:1.15.0"
+    implementation "com.google.ar.sceneform:assets:1.15.0"
 
     //Map
     implementation 'com.google.android.gms:play-services-location:16.0.0'

@@ -6,7 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".MainMenuActivity">
 
-    <android.support.design.widget.AppBarLayout
+<!--    <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:theme="@style/Theme.PaseosVirtuales.AppBarOverlay">
@@ -19,7 +19,7 @@
             app:popupTheme="@style/Theme.PaseosVirtuales.PopupOverlay" />
 
     </android.support.design.widget.AppBarLayout>
-
+-->
 
 
     <fragment

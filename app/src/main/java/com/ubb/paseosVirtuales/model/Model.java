@@ -8,7 +8,7 @@ import com.google.ar.sceneform.math.Vector3;
 import com.google.ar.sceneform.rendering.ViewRenderable;
 
 public class Model {
-    String obj;
+    public String obj;
     String texture;
     String shadow;
     ViewRenderable info;

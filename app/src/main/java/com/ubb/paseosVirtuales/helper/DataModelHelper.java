@@ -5,6 +5,8 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.google.ar.sceneform.FrameTime;
 import com.google.ar.sceneform.HitTestResult;
@@ -62,7 +64,10 @@ public class DataModelHelper extends Node implements Node.OnTapListener {
                                 renderable.setShadowReceiver(false);
 
                                 infoCard.setRenderable(renderable);
-                                ImageButton imageButton = (ImageButton) renderable.getView().findViewById(R.id.info_button);
+                                TextView title = (TextView) renderable.getView().findViewById(R.id.tv_msg_model);
+                                title.setText(dataModel.data.getName().length() > 0 ? dataModel.data.getName() : "Sin nombre");
+
+                                LinearLayout imageButton = (LinearLayout) renderable.getView().findViewById(R.id.btn_card_model);
                                 imageButton.setOnClickListener(new View.OnClickListener() {
                                     @Override
                                     public void onClick(View view) {

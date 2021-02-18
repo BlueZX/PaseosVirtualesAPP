@@ -22,18 +22,18 @@ public class SnackbarHelper {
     public void showMessage(Activity activity, String message) {
         if (!message.isEmpty() && (!isShowing() || !lastMessage.equals(message))) {
             lastMessage = message;
-            show(activity, message, DismissBehavior.HIDE);
+            show(activity, message, BACKGROUND_COLOR, DismissBehavior.HIDE);
         }
     }
 
     // Se muestra un mensaje con un boton de descartar el mensaje
-    public void showMessageWithDismiss(Activity activity, String message) {
-        show(activity, message, DismissBehavior.SHOW);
+    public void showMessageWithDismiss(Activity activity, String message, int Color) {
+        show(activity, message, Color, DismissBehavior.SHOW);
     }
 
     // muestra el snackbar con un mensaje de error
     public void showError(Activity activity, String errorMessage) {
-        show(activity, errorMessage, DismissBehavior.FINISH);
+        show(activity, errorMessage, BACKGROUND_COLOR, DismissBehavior.FINISH);
     }
 
     // oculta el snackbar
@@ -61,16 +61,16 @@ public class SnackbarHelper {
         this.snackbarView = snackbarView;
     }
 
-    private void show(final Activity activity, final String message, final DismissBehavior dismissBehavior) {
+    private void show(final Activity activity, final String message, int BackgroundColor, final DismissBehavior dismissBehavior) {
         activity.runOnUiThread(
                 new Runnable() {
                     @Override
                     public void run() {
                         messageSnackbar = Snackbar.make(snackbarView == null ? activity.findViewById(android.R.id.content) : snackbarView, message, Snackbar.LENGTH_INDEFINITE);
-                        messageSnackbar.getView().setBackgroundColor(BACKGROUND_COLOR);
+                        messageSnackbar.getView().setBackgroundColor((BackgroundColor == 0) ? BACKGROUND_COLOR: BackgroundColor);
 
                         if (dismissBehavior != DismissBehavior.HIDE) {
-                            messageSnackbar.setAction("Dismiss", new View.OnClickListener() {
+                            messageSnackbar.setAction("Cerrar", new View.OnClickListener() {
                                 @Override
                                 public void onClick(View v) {
                                     messageSnackbar.dismiss();
@@ -90,6 +90,7 @@ public class SnackbarHelper {
                             }
                         }
                         ((TextView) messageSnackbar.getView().findViewById(android.support.design.R.id.snackbar_text)).setMaxLines(maxLines);
+                        messageSnackbar.setDuration(6000);
                         messageSnackbar.show();
                     }
                 }
