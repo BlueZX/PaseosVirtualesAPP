@@ -153,6 +153,7 @@ public class ArActivity extends AppCompatActivity implements LocationListener {
                     .setSource(
                             this,
                             renderableSource)
+                    .setRegistryId(GlobalHelper.DOWNLOAD + "/uploads/modelo/"+ dm.model.obj)
                     .build()
                     .thenAccept(modelRenderable -> {
 

@@ -9,7 +9,10 @@
     <string name="already_account">Tienes una cuenta?</string>
     <string name="signin_signup">Ingresa</string>
     <string name="email">Email</string>
+    <string name="name">Nombre</string>
     <string name="password">Contraseña</string>
+    <string name="upload">Subir</string>
+    <string name="updateProfile">Actualizar datos</string>
     <string name="signin">Iniciar Sesión</string>
     <string name="ingresar">Ingresar</string>
     <string name="home">Inicio</string>

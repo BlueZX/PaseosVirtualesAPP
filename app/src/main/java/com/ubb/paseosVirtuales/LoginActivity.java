@@ -14,7 +14,7 @@ import android.widget.ImageButton;
 
 import com.android.volley.Response;
 import com.android.volley.Response.Listener;
-import com.android.volley.VolleyError;
+import com.android.volley.error.VolleyError;
 import com.ubb.paseosVirtuales.DataBase.Modelo;
 import com.ubb.paseosVirtuales.DataBase.ParametrosDTO;
 import com.ubb.paseosVirtuales.helper.GlobalHelper;
@@ -82,6 +82,12 @@ public class LoginActivity extends AppCompatActivity {
 
                                 obj.insertParametros( LoginActivity.this, param);
 
+                                param.setId("4");
+                                param.setNombre("uid");
+                                param.setValue(response.get("uid").toString());
+
+                                obj.insertParametros( LoginActivity.this, param);
+
                                 param.setId("2");
                                 param.setNombre("TOKEN");
                                 param.setValue(response.get("token").toString());
@@ -95,6 +101,9 @@ public class LoginActivity extends AppCompatActivity {
                                 else {
                                     messageSnackbarHelper.showMessageWithDismiss((Activity) c, "A ocurrido un error inesperado, porfavor intentalo de nuevo", Color.RED);
                                 }
+                            }
+                            else{
+                                messageSnackbarHelper.showMessageWithDismiss((Activity) c, "A ocurrido un error inesperado", Color.RED);
                             }
                         } catch (JSONException e) {
                             messageSnackbarHelper.showMessageWithDismiss((Activity) c, "A ocurrido un error inesperado", Color.RED);

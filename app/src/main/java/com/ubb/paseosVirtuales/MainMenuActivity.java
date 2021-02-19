@@ -26,7 +26,7 @@ import android.view.Window;
 import android.widget.TextView;
 
 import com.android.volley.Response;
-import com.android.volley.VolleyError;
+import com.android.volley.error.VolleyError;
 import com.google.gson.Gson;
 import com.ubb.paseosVirtuales.DataBase.Modelo;
 import com.ubb.paseosVirtuales.DataBase.ParametrosDTO;
@@ -86,62 +86,19 @@ public class MainMenuActivity extends AppCompatActivity {
                         param.setNombre("MODELS");
                         param.setValue(response.get("modelos").toString());
 
-                        Gson gson = new Gson();
-                        JSONArray jsonArray = new JSONArray(response.get("modelos").toString());
-
-                        for (int i = 0; i < jsonArray.length(); i++) {
-                            DataModel dm = gson.fromJson(jsonArray.getJSONObject(i).toString(),DataModel.class);
-
-                            File myDir = new File(Environment.getExternalStorageDirectory().toString() + "/Download");
-                            myDir.mkdirs();
-
-                            File file = new File(myDir, dm.model.obj);
-
-                            if(!file.exists()){
-                                tvLoading.setText("Descargando modelos 3D");
-                                if(!loading.isShowing()){
-                                    loading.show();
-                                }
-
-                                DownloadManager downloadmanager = (DownloadManager) getSystemService(Context.DOWNLOAD_SERVICE);
-                                Uri uri = Uri.parse(GlobalHelper.DOWNLOAD + "/uploads/modelo/"+ dm.model.obj);
-
-                                DownloadManager.Request request = new DownloadManager.Request(uri);
-
-                                request.setTitle("Modelo_"+ dm.data.getName() );
-                                request.setDescription("Modelo para paseos virtuales");
-                                request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
-                                request.setVisibleInDownloadsUi(false);
-
-                                request.setDestinationUri(Uri.parse("file://" + Environment.getExternalStorageDirectory() +"/Download/"+ dm.model.obj));
-
-                                downloadmanager.enqueue(request);
-                            }
-                            else {
-                                loading.dismiss();
-                            }
-
-                        }
-
-                        IntentFilter filter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
-                        BroadcastReceiver receiver = new BroadcastReceiver() {
-                            @Override
-                            public void onReceive(Context context, Intent intent) {
-                                loading.dismiss();
-                            }
-                        };
-                        registerReceiver(receiver, filter);
-
                         int resInsert = obj.insertParametros( MainMenuActivity.this, param);
 
                         if(resInsert == 1){
+                            loading.dismiss();
                             Log.i("Almacenado", param.toString());
                         }
                         else {
+                            loading.dismiss();
                             messageSnackbarHelper.showMessageWithDismiss((Activity) MainMenuActivity.this, "A ocurrido un error inesperado al inicializar la aplicacion", Color.RED);
                         }
                     }
                 } catch (JSONException e) {
+                    loading.dismiss();
                     messageSnackbarHelper.showMessageWithDismiss((Activity) MainMenuActivity.this, "A ocurrido un error inesperado al leer los modelos 3D", Color.RED);
 
                     e.printStackTrace();
@@ -150,6 +107,7 @@ public class MainMenuActivity extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
+                loading.dismiss();
                 messageSnackbarHelper.showMessageWithDismiss((Activity) MainMenuActivity.this, "No es posible conectar con el servidor", Color.RED);
 
             }
