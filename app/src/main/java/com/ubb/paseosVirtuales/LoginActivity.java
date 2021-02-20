@@ -115,7 +115,7 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onErrorResponse(VolleyError error) {
                         if(error.networkResponse.statusCode == 400){
-                            messageSnackbarHelper.showMessageWithDismiss((Activity) c, "El email o contraseña introducidos no son correctos.", Color.RED);
+                            messageSnackbarHelper.showMessageWithDismiss((Activity) c, "El email o contraseña introducidos no son correctos o no se ha validado el correo electronico", Color.RED);
                         }
                         else{
                             messageSnackbarHelper.showMessageWithDismiss((Activity) c, "No es posible conectar con el servidor", Color.RED);
