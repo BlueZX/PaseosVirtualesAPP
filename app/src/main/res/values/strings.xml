@@ -18,6 +18,10 @@
     <string name="home">Inicio</string>
     <string name="map">Ubicación</string>
     <string name="ra">RA</string>
+    <string name="detail_name">Nombre: </string>
+    <string name="detail_description">Descripción: </string>
+    <string name="detail_extra">Información Extra:</string>
+    <string name="detail_date">Fecha Historica: </string>
     <!-- Strings used for fragments for navigation -->
     <string name="first_fragment_label">First Fragment</string>
     <string name="second_fragment_label">Second Fragment</string>

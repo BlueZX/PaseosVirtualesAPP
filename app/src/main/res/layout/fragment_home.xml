@@ -59,6 +59,7 @@
             >
             <ImageView
                 android:layout_width="185dp"
+                android:id="@+id/img_home_view"
                 android:layout_height="185dp"
                 android:background="@color/white"
                 android:src="@drawable/no_disponible"/>
@@ -75,12 +76,14 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textAlignment="center"
+                android:textColor="@color/black"
                 android:text="NO NAME"
                 android:textAppearance="@style/TextAppearance.AppCompat.Large" />
             <TextView
                 android:id="@+id/email_home_tv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="@color/black"
                 android:layout_marginTop="10dp"
                 android:textAlignment="center"
                 android:text="NO EMAIL"

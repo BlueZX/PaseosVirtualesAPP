@@ -50,7 +50,7 @@ public class Modelo {
         }
         catch (Exception e){
             e.printStackTrace();
-            res = "false";
+            res = "";
         }
 
         db.close();
@@ -60,13 +60,37 @@ public class Modelo {
 
     public boolean dropTableParametros(Context context){
         SQLiteDatabase db = getConn(context);
+        boolean res = false;
 
-        db.execSQL("DROP TABLE IF EXISTS parametros");
-        db.execSQL("CREATE TABLE parametros (id INTEGER, nombre TEXT, value TEXT)");
+        try{
+            db.execSQL("DROP TABLE IF EXISTS parametros");
+            db.execSQL("CREATE TABLE parametros (id INTEGER, nombre TEXT, value TEXT)");
+            res = true;
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
 
         db.close();
 
-        return true;
+        return res;
+    }
+
+    public boolean updateParametro(Context context, String nombre, ParametrosDTO param){
+        boolean res = false;
+        SQLiteDatabase db = getConn(context);
+
+        try{
+            db.execSQL("UPDATE parametros SET value = '" + param.getValue() + "' WHERE nombre='"+ nombre+"' ");
+            res = true;
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+
+        db.close();
+
+        return res;
     }
 
 

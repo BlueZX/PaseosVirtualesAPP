@@ -59,6 +59,7 @@ public class VolleyHelper {
                     Listener<JSONObject> listener, ErrorListener errorListener) {
 
         JsonObjectRequest objRequest = new JsonObjectRequest(Method.GET, contructUrl(method), jsonRequest, listener, errorListener);
+        objRequest.setShouldCache(false);
         mRequestQueue.add(objRequest);
     }
 
@@ -74,6 +75,7 @@ public class VolleyHelper {
                 return headers;
             }
         };
+        objRequest.setShouldCache(false);
         mRequestQueue.add(objRequest);
     }
 

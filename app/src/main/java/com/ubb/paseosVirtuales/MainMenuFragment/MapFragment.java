@@ -1,8 +1,10 @@
 package com.ubb.paseosVirtuales.MainMenuFragment;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -17,6 +19,8 @@ import android.view.ViewGroup;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 
+import com.android.volley.Response;
+import com.android.volley.error.VolleyError;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -27,12 +31,18 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.gson.Gson;
 import com.ubb.paseosVirtuales.ArActivity;
 import com.ubb.paseosVirtuales.DataBase.Modelo;
+import com.ubb.paseosVirtuales.DataBase.ParametrosDTO;
+import com.ubb.paseosVirtuales.MainMenuActivity;
 import com.ubb.paseosVirtuales.R;
+import com.ubb.paseosVirtuales.helper.GlobalHelper;
+import com.ubb.paseosVirtuales.helper.SnackbarHelper;
+import com.ubb.paseosVirtuales.helper.VolleyHelper;
 import com.ubb.paseosVirtuales.helper.getDataHelper;
 import com.ubb.paseosVirtuales.model.DataModel;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +54,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
     private MapView mapView;
     private GoogleMap map;
     private List<DataModel> modelsList = new ArrayList<>();
+    private VolleyHelper volleyHelper;
+    private final SnackbarHelper messageSnackbarHelper = new SnackbarHelper();
     private Location location;
     private JSONArray jsonArray;
 
@@ -51,6 +63,8 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View root = inflater.inflate(R.layout.fragment_map, container, false);
+
+        volleyHelper = new VolleyHelper(getContext(), GlobalHelper.ENDPOINT);
 
         try {
             Modelo obj = new Modelo();
@@ -64,9 +78,10 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
                 modelsList.add(m);
             }
 
-        } catch (JSONException e) {
+        }
+        catch (JSONException e) {
             e.printStackTrace();
-            //TODO: mensaje de error
+            messageSnackbarHelper.showMessageWithDismiss(getActivity(), "A ocurrido un error inesperado al leer la ubicacion", Color.RED);
         }
 
         mapView = (MapView) root.findViewById(R.id.map);
@@ -94,10 +109,56 @@ public class MapFragment extends Fragment implements OnMapReadyCallback, Locatio
         map.setMaxZoomPreference(18.0f);
         handleNewLocation(location);
 
-        for(DataModel dm: modelsList){
-            LatLng loc = new LatLng(dm.location.lat, dm.location.lng);
-            map.addMarker(new MarkerOptions().position(loc).title(dm.data.getName().length() > 0 ? dm.data.getName() : "Sin nombre"));
-        }
+        getModels();
+    }
+
+    private void getModels(){
+        volleyHelper.get("api/modelos", null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                Log.i("Models", response.toString());
+                try {
+                    if(response.get("ok").toString().equals("true")){
+                        JSONArray models = response.getJSONArray("modelos");
+                        Modelo obj = new Modelo();
+                        ParametrosDTO param = new ParametrosDTO();
+
+                        param.setId("3");
+                        param.setNombre("MODELS");
+                        param.setValue(response.get("modelos").toString());
+
+                        if(obj.updateParametro(getActivity(), "MODELS", param)){
+
+                            Gson gson = new Gson();
+                            modelsList = new ArrayList<>();
+
+                            for (int i = 0; i < models.length(); i++) {
+                                DataModel m = gson.fromJson(models.getJSONObject(i).toString(),DataModel.class);
+                                modelsList.add(m);
+                            }
+
+                            for(DataModel dm: modelsList){
+                                LatLng loc = new LatLng(dm.location.lat, dm.location.lng);
+                                map.addMarker(new MarkerOptions().position(loc).title(dm.data.getName().length() > 0 ? dm.data.getName() : "Sin nombre"));
+                            }
+                        }
+                        else{
+                            messageSnackbarHelper.showMessageWithDismiss((Activity) getActivity(), "A ocurrido un error inesperado al leer la ubicacion", Color.RED);
+                        }
+
+                    }
+                } catch (JSONException e) {
+                    messageSnackbarHelper.showMessageWithDismiss((Activity) getActivity(), "A ocurrido un error inesperado al leer la ubicacion", Color.RED);
+
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                messageSnackbarHelper.showMessageWithDismiss(getActivity(), "No es posible conectar con el servidor", Color.RED);
+            }
+        });
     }
 
     @Override

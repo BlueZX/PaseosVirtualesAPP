@@ -1,6 +1,7 @@
 package com.ubb.paseosVirtuales.helper;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -18,6 +19,8 @@ import com.google.ar.sceneform.rendering.ModelRenderable;
 import com.google.ar.sceneform.rendering.ViewRenderable;
 import com.google.ar.sceneform.ux.ArFragment;
 import com.google.ar.sceneform.ux.TransformableNode;
+import com.ubb.paseosVirtuales.DetailActivity;
+import com.ubb.paseosVirtuales.MainMenuActivity;
 import com.ubb.paseosVirtuales.R;
 import com.ubb.paseosVirtuales.model.DataModel;
 
@@ -72,6 +75,14 @@ public class DataModelHelper extends Node implements Node.OnTapListener {
                                     @Override
                                     public void onClick(View view) {
                                         Log.d("boton ar","se toco el boton info");
+                                        Intent intent = new Intent(context, DetailActivity.class);
+
+                                        intent.putExtra("name", dataModel.data.getName().length() > 0 ? dataModel.data.getName() : "Sin nombre");
+                                        intent.putExtra("detail", dataModel.data.getDescription().length() > 0 ? dataModel.data.getDescription() : "Sin descripción");
+                                        intent.putExtra("extraInfo", dataModel.data.getExtraInfo().length() > 0 ? dataModel.data.getExtraInfo() : "Sin información extra");
+                                        intent.putExtra("date", dataModel.data.getDateMonument().length() > 0 ? dataModel.data.getDateMonument() : "");
+
+                                        context.startActivity(intent);
                                     }
                                 });
 

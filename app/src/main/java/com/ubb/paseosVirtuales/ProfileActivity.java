@@ -24,6 +24,7 @@ import android.widget.TextView;
 
 import com.android.volley.Response;
 import com.android.volley.error.VolleyError;
+import com.squareup.picasso.Picasso;
 import com.ubb.paseosVirtuales.DataBase.Modelo;
 import com.ubb.paseosVirtuales.helper.GlobalHelper;
 import com.ubb.paseosVirtuales.helper.SnackbarHelper;
@@ -87,6 +88,7 @@ public class ProfileActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 onBackPressed();
+                finish();
             }
         });
 
@@ -167,6 +169,10 @@ public class ProfileActivity extends AppCompatActivity {
                         nameET.setText(user.getString("name"));
                         emailET.setText(user.getString("email"));
 
+                        String urlImage = response.getString("img");
+                        if(!urlImage.isEmpty()){
+                            Picasso.with(c).load(GlobalHelper.DOWNLOAD + "/uploads/usuario/" + urlImage).into(imagen);
+                        }
                     }
                     else{
                         messageSnackbarHelper.showMessageWithDismiss((Activity) c, "A ocurrido un error inesperado", Color.RED);

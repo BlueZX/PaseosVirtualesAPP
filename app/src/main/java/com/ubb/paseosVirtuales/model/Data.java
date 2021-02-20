@@ -4,6 +4,7 @@ public class Data {
     String name;
     String description;
     String dateMonument;
+    String extraInfo;
 
     public String getName() {
         return name;
@@ -27,5 +28,9 @@ public class Data {
 
     public void setDateMonument(String dateMonument) {
         this.dateMonument = dateMonument;
+    }
+
+    public String getExtraInfo() {
+        return extraInfo;
     }
 }

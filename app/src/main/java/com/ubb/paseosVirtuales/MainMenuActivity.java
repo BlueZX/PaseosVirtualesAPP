@@ -71,48 +71,6 @@ public class MainMenuActivity extends AppCompatActivity {
         tvLoading = (TextView) loading.findViewById(R.id.tv_loading);
         tvLoading.setText("Cargando información");
 
-        loading.show();
-
-        volleyHelper.get("api/modelos", null, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                Log.i("Models", response.toString());
-                try {
-                    if(response.get("ok").toString().equals("true")){
-                        Modelo obj = new Modelo();
-                        ParametrosDTO param = new ParametrosDTO();
-
-                        param.setId("3");
-                        param.setNombre("MODELS");
-                        param.setValue(response.get("modelos").toString());
-
-                        int resInsert = obj.insertParametros( MainMenuActivity.this, param);
-
-                        if(resInsert == 1){
-                            loading.dismiss();
-                            Log.i("Almacenado", param.toString());
-                        }
-                        else {
-                            loading.dismiss();
-                            messageSnackbarHelper.showMessageWithDismiss((Activity) MainMenuActivity.this, "A ocurrido un error inesperado al inicializar la aplicacion", Color.RED);
-                        }
-                    }
-                } catch (JSONException e) {
-                    loading.dismiss();
-                    messageSnackbarHelper.showMessageWithDismiss((Activity) MainMenuActivity.this, "A ocurrido un error inesperado al leer los modelos 3D", Color.RED);
-
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                loading.dismiss();
-                messageSnackbarHelper.showMessageWithDismiss((Activity) MainMenuActivity.this, "No es posible conectar con el servidor", Color.RED);
-
-            }
-        });
-
         navigation = (BottomNavigationView) findViewById(R.id.bottom_navigation);
 
         navigation.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -127,8 +85,10 @@ public class MainMenuActivity extends AppCompatActivity {
                         break;
                     case R.id.initRA:
                         viewIsAtHome = false;
+                        getModels();
                         Intent intent = new Intent(getApplicationContext(), ArActivity.class);
                         startActivity(intent);
+                        finish();
                         break;
                     case R.id.map:
                         addFragment(new MapFragment());
@@ -185,6 +145,64 @@ public class MainMenuActivity extends AppCompatActivity {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
+
+        getModels();
+    }
+
+    private void getModels(){
+        loading.show();
+
+        volleyHelper.get("api/modelos", null, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                Log.i("Models", response.toString());
+                try {
+                    if(response.get("ok").toString().equals("true")){
+                        Modelo obj = new Modelo();
+                        ParametrosDTO param = new ParametrosDTO();
+
+                        param.setId("3");
+                        param.setNombre("MODELS");
+                        param.setValue(response.get("modelos").toString());
+
+                        if(obj.getParametro(MainMenuActivity.this,"MODELS").equals("")){
+                            int resInsert = obj.insertParametros( MainMenuActivity.this, param);
+
+                            if(resInsert == 1){
+                                loading.dismiss();
+                                Log.i("Almacenado", param.toString());
+                            }
+                            else {
+                                loading.dismiss();
+                                messageSnackbarHelper.showMessageWithDismiss((Activity) MainMenuActivity.this, "A ocurrido un error inesperado al inicializar la aplicacion", Color.RED);
+                            }
+                        }
+                        else{
+                            if(obj.updateParametro(MainMenuActivity.this, "MODELS", param)){
+                                loading.dismiss();
+                            }
+                            else{
+                                loading.dismiss();
+                                messageSnackbarHelper.showMessageWithDismiss((Activity) MainMenuActivity.this, "A ocurrido un error inesperado al leer los modelos 3D", Color.RED);
+                            }
+                        }
+
+                    }
+                } catch (JSONException e) {
+                    loading.dismiss();
+                    messageSnackbarHelper.showMessageWithDismiss((Activity) MainMenuActivity.this, "A ocurrido un error inesperado al leer los modelos 3D", Color.RED);
+
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                loading.dismiss();
+                messageSnackbarHelper.showMessageWithDismiss((Activity) MainMenuActivity.this, "No es posible conectar con el servidor", Color.RED);
+
+            }
+        });
     }
 
     @Override

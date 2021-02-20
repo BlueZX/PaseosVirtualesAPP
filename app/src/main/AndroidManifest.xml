@@ -71,6 +71,16 @@
         <activity
             android:name=".ProfileActivity"
             android:label="Perfil de usuario"
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="locked"
+            android:theme="@style/AppTheme">
+        </activity>
+
+        <activity
+            android:name=".DetailActivity"
+            android:label="Detalle del modelo"
+            android:configChanges="orientation|screenSize"
+            android:screenOrientation="locked"
             android:theme="@style/AppTheme">
         </activity>
 

@@ -109,6 +109,7 @@ public class ArActivity extends AppCompatActivity implements LocationListener {
             public void onClick(View view) {
                 Intent intent = new Intent(view.getContext(), MainMenuActivity.class);
                 startActivity(intent);
+                finish();
             }
         });
     }
@@ -288,9 +289,6 @@ public class ArActivity extends AppCompatActivity implements LocationListener {
 
             if(dm.location.distance <= 10){
                 dm.location.setVisible(true);
-            }
-            else{
-                dm.location.setVisible(false);
             }
         }
     }
